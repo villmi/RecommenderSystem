@@ -14,7 +14,7 @@ def run(m, n, name):
     conn = mysql.connector.connect(host="localhost", user="vill", passwd="hao5jx", database="recommenderSystem")
     cursor = conn.cursor()
     # file_path = input("Please input file_path:\n")
-    file_path = "/Users/vill/Desktop/推荐系统导论/netflix数据集/training_set"
+    file_path = "E:/recommenderSystem/training_set"
     for i in range(m, n):
         i = int(i)
         num = int(getNum(i, 1))
@@ -49,11 +49,11 @@ def run(m, n, name):
 
 
 if __name__ == '__main__':
-    t1 = threading.Thread(target=run, args=(5614, 7501, "thread1"))
-    t3 = threading.Thread(target=run, args=(8911, 10986, "thread3"))
-    t2 = threading.Thread(target=run, args=(16153, 16960, "thread2"))
-    t4 = threading.Thread(target=run, args=(16960, 17771, "thread4"))
-    t1.start()
+    t1 = threading.Thread(target=run, args=(1, 7501, "thread1"))
+    t3 = threading.Thread(target=run, args=(7501, 12000, "thread3"))
+    t2 = threading.Thread(target=run, args=(12001, 15000, "thread2"))
+    t4 = threading.Thread(target=run, args=(15001, 17771, "thread4"))
+    # t1.start()
     t2.start()
     t3.start()
     t4.start()
