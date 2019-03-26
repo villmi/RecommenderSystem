@@ -1,79 +1,65 @@
 import mysql.connector
 
-conn1 = mysql.connector.connect(host="localhost", user="vill", passwd="hao5jx", database="recommenderSystem_1per_Training")
-cursor1 = conn1.cursor()
-conn2 = mysql.connector.connect(host="localhost", user="vill", passwd="hao5jx", database="recommenderSystem_1per_TestSet")
-cursor2 = conn2.cursor()
-conn3 = mysql.connector.connect(host="localhost", user="vill", passwd="hao5jx", database="recommenderSystem_1per_Training")
-cursor3 = conn3.cursor()
-conn4 = mysql.connector.connect(host="localhost", user="vill", passwd="hao5jx", database="recommenderSystem_1per_TestSet")
-cursor4 = conn4.cursor()
+# conn = mysql.connector.connect(host='localhost',user='root',passwd='zxk123456',db='recommender_db')
+# cursor = conn.cursor()
+
+def Predict():
+    #连接数据库
+    conn = mysql.connector.connect(host='localhost', user='vill', passwd='hao5jx', db='recommenderSystem_MVLENS')
+    cursor = conn.cursor()
+
+    for i in range(1, 943):
+        #获取uerId对应的电影ID
+        sql = 'select movieId from ratings where userId=%d' % i
+        cursor.execute(sql)
+        movies = cursor.fetchall()
+        print(movies)
+
+        #获取相似度大于0用户
+        sql = 'select * from similarity where (user1=%d or user2=%d) and similarity>0 order by similarity desc' % (i,i)
+        cursor.execute(sql)
+        sim = cursor.fetchall()
+        similar = []
+
+        #获取评分平均值
+        sql = 'select avg(rate) from ratings where userId=%d' % i
+        cursor.execute(sql)
+        avg = cursor.fetchall()
+        avg = avg[0]
+        for j in sim:
+            if int(j[1]) == i:
+                similar.append((j[2],j[3]))
+            elif int(j[2]) == i:
+                similar.append(j[1],j[3])
+        print(similar)
+        for movie in movies:
+
+            down = 0
+            up = 0
+            for similarity in similar:
+                sql = 'select rate from ratings where userId=%d and movieId=%d'% (int(similarity[0]),int(movie[0]))
+                cursor.execute(sql)
+                rate = cursor.fetchall()
+                if rate is not None:
+                    print('%s :%s: %s' % (similarity[0],similarity[1],rate[0]))
+
+                    sql = 'select avg(rate) from ratings where userId=%d' % int(similarity[0])
+                    cursor.execute(sql)
+                    avg1 = cursor.fetchall()
+                    avg1 = avg1[0]
+                    up += similarity[1]*float(rate[0]-avg1)
+                    down += float(similarity[1])
+
+            if down != 0:
+                predict = float(avg)+up/down
+                print(predict)
+                # sql = 'update ratings set prodiction=%f where userId=%d and movieId=%d'% (predict,i,movie[0])
+                # cursor.execute(sql)
+                # conn.commit()
+        break
 
 
-def vFilter(result_similarity):
-    list1 = []
-    list2 = []
-    while len(result_similarity) != 0:
-        a = result_similarity.pop()
-        if a[4] > 10:
-            list1.append(a)
-        else:
-            list2.append(a)
-    return list2 + list1
 
 
-for i in range(1, 9):
-    with open("/Users/vill/Desktop/推荐系统导论/netflix数据集/1perMovie.txt") as f:
-        movieName = f.readline()[:-1]
-        while movieName is not "":
-            sql = "select * from similarity where movie1='%s' or movie2='%s' order by similarity desc, count desc" % (movieName,movieName)
-            cursor1.execute(sql)
-            result_similarity = cursor1.fetchall()
-            result_similarity = vFilter(result_similarity)
-            # for i in range(1, 176):
-            #     print(result_similarity[i])
-            sql = "select consumerId from %s" % movieName
-            cursor2.execute(sql)
-            consumerId = cursor2.fetchone()
-            while consumerId is not None:
-                consumerId = consumerId[0]
-                count = 0
-                up = 0
-                down = 0
-                rs = result_similarity[:]
-                while count != i and len(rs) != 0:
-                    r = rs.pop()
-                    sql = "select * from %s where consumerId='%s'" % (r[2], consumerId)
-                    print(sql)
-                    # try:
-                    cursor3.execute(sql)
-                    result = cursor3.fetchone()
-                    if result is not None:
-                        rate = float(result[2])
-                        up += float(rate * r[4])
-                        down += float(r[4])
-                        count += 1
-                        print("%f,%f" % (up, down))
-                    # except:
-                        # continue
-                prediction = 0
-                try:
-                    prediction = float(up/down)
-                except:
-                    prediction = -1.0
-                sql = "insert into pre_%s_%d(consumerId,rate) values('%s','%f')" % (movieName, i, consumerId, prediction)
-                # print(sql)
-                cursor4.execute(sql)
-                conn4.commit()
-                # print(movie2)
-                consumerId = cursor2.fetchone()
-                print(len(result_similarity))
-            # movieName = f.readline()[:-1]
-            movieName = ""
-
-            # sql = "select consumerId from %s" % movieName
-            # cursor2.execute(sql)
-            # consumerId = cursor2.fetchone()[0]
-            # while consumerId is not None:
-            #     sql = "select * from si"
-
+if __name__ == '__main__':
+    Predict()
