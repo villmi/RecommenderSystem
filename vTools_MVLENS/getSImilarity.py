@@ -60,7 +60,7 @@ def runSimilarity(fCount):
                 else:
                     n += 1
             similarity, count = getSimilarity(rate1, rate2)
-            # sql = "insert into similarity(userId1, userId2, similarity, count) values(%d,%d,%f,%d)" % (i, j, similarity, count)  # 将两两用户之间的相似度导入数据库
+            sql = "insert into similarity(userId1, userId2, similarity, count) values(%d,%d,%f,%d)" % (i, j, similarity, count)  # 将两两用户之间的相似度导入数据库
             cursor.execute(sql)
             print("similarity between user%d and user%d is: %f " % (i, j, similarity))
         conn.commit()
@@ -127,10 +127,10 @@ if __name__ == '__main__':
     # getPredict()
     # fTime = time.time()
     # print("timeCost is :%f" % float(sTime-fTime))
-    # getPredict()
-    t = time.time()
-    runSimilarity(943)
-    print(time.time() - t)
+    getPredict()
+    # t = time.time()
+    # runSimilarity(943)
+    # print(time.time() - t)
     "一个看数据时的考虑：" \
     "就结果而言，如果一个用户测试集中的实际评分与预测评分差距较大，比如实际5分，预测2分，这个用户的这个高分是否被电影整体评分以及评分时间段影响" \
     "比如可以考虑用户被影响的概率？？？（只是猜想，可忽略不计）"

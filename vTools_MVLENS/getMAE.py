@@ -23,9 +23,10 @@ def getMAE():
             rate = float(result[0])
             total += abs(predict - rate)
     MAE = total / a
+    print("MAE is:")
     print(MAE)
-    print(total)
-    print(a)
+    # print(total)
+    # print(a)
 
 
 if __name__ == '__main__':
